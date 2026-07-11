@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Green Ford KPI Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0f1a; color: #f9fafb; font-family: 'DM Sans', 'Segoe UI', sans-serif; min-height: 100vh; padding-bottom: 60px; }
+  input, select, textarea, button { font-family: inherit; }
+  input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+
+  /* Header */
+  #header { background: linear-gradient(135deg, #001f3f 0%, #003366 100%); border-bottom: 2px solid #10b981; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  #logo { font-size: 21px; font-weight: 900; color: #10b981; letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
+  #sub  { font-size: 11px; color: #6ee7b7; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
+  #header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  /* Nav */
+  .nav-btn { padding: 7px 18px; border-radius: 99px; border: none; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; transition: all .2s; }
+  .nav-btn.active { background: #10b981; color: #000; }
+  .nav-btn:not(.active) { background: #1f2937; color: #9ca3af; }
+  .nav-btn:not(.active):hover { background: #374151; color: #f9fafb; }
+
+  input[type="date"] { background: #0a2040; border: 1px solid #10b981; border-radius: 8px; color: #10b981; padding: 7px 12px; font-size: 14px; font-weight: 700; }
+
+  /* Main */
+  #main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Section */
+  .section { background: #111827; border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; border: 1px solid #1f2937; }
+  .section-title { font-size: 12px; font-weight: 800; color: #10b981; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+
+  /* Stat row */
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .stat-card { background: #111827; border-radius: 12px; padding: 16px 20px; min-width: 120px; }
+  .stat-val { font-size: 26px; font-weight: 800; font-family: 'DM Mono', monospace; }
+  .stat-label { font-size: 11px; color: #9ca3af; margin-top: 2px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .stat-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+  /* Tabs */
+  .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab-btn { padding: 8px 20px; border-radius: 99px; border: none; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; transition: all .2s; }
+  .tab-btn.active { background: #1d4ed8; color: #fff; }
+  .tab-btn:not(.active) { background: #1f2937; color: #9ca3af; }
+  .tab-btn:not(.active):hover { background: #374151; color: #f9fafb; }
+
+  /* Phone inputs */
+  .phone-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
+  .phone-item { text-align: center; }
+  .num-input { background: #0a0f1a; border: 1px solid #374151; border-radius: 8px; color: #f9fafb; font-size: 20px; font-weight: 800; font-family: 'DM Mono', monospace; padding: 8px 12px; width: 80px; text-align: center; }
+  .field-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; margin-top: 4px; }
+
+  /* Progress bar */
+  .prog-wrap { background: #1f2937; border-radius: 99px; height: 6px; overflow: hidden; margin-top: 6px; }
+  .prog-fill { height: 100%; border-radius: 99px; transition: width .3s; }
+  .prog-target { font-size: 10px; color: #4b5563; margin-top: 2px; }
+
+  /* Rate boxes */
+  .rate-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 20px; background: #0a0f1a; border-radius: 10px; padding: 16px; }
+  .rate-box { text-align: center; }
+  .rate-val { font-size: 28px; font-weight: 900; font-family: 'DM Mono', monospace; }
+
+  /* Funnel */
+  .funnel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .funnel-icon { width: 28px; font-size: 16px; text-align: center; flex-shrink: 0; }
+  .funnel-name { font-size: 12px; color: #9ca3af; width: 150px; flex-shrink: 0; }
+  .funnel-bar-wrap { flex: 1; background: #1f2937; border-radius: 99px; height: 20px; overflow: hidden; }
+  .funnel-bar { height: 100%; border-radius: 99px; transition: width .4s; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .funnel-bar span { font-size: 10px; font-weight: 800; color: #000; }
+  .funnel-pct { font-size: 13px; font-weight: 800; font-family: 'DM Mono', monospace; width: 40px; text-align: right; flex-shrink: 0; }
+
+  /* UPs */
+  .up-row { border-radius: 12px; margin-bottom: 8px; overflow: hidden; border: 1px solid #1f2937; background: #0d1321; }
+  .up-row.open { background: #1a2035; border-color: #1d4ed8; }
+  .up-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; }
+  .up-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .up-name { flex: 1; font-weight: 700; font-size: 14px; }
+  .up-source { font-size: 11px; color: #6b7280; }
+  .up-icons { display: flex; gap: 4px; }
+  .up-chevron { font-size: 14px; color: #6b7280; }
+  .up-body { padding: 0 16px 16px; border-top: 1px solid #1f2937; }
+  .up-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; margin-top: 12px; }
+  .text-input { background: #0a0f1a; border: 1px solid #374151; border-radius: 8px; color: #f9fafb; padding: 8px 12px; width: 100%; font-size: 14px; }
+  .text-input:focus { outline: 1px solid #10b981; }
+  .steps-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .step-btn { padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: 700; transition: all .15s; }
+  .step-btn.on { background: #10b981; color: #000; }
+  .step-btn.off { background: #1f2937; color: #6b7280; }
+  .step-btn.off:hover { background: #374151; color: #9ca3af; }
+  textarea.text-input { resize: vertical; }
+
+  /* Buttons */
+  .btn { padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 13px; transition: opacity .2s; }
+  .btn:hover { opacity: .85; }
+  .btn-green { background: #10b981; color: #000; }
+  .btn-blue { background: #1d4ed8; color: #fff; }
+  .btn-red { background: #dc2626; color: #fff; }
+  .btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .btn-end { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+  /* Table */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 10px; border-bottom: 1px solid #1f2937; color: #6b7280; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+  td { padding: 8px 10px; font-family: 'DM Mono', monospace; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover td { background: #1a2035; }
+  tr.active-row td { background: #1a2035; }
+  .td-name { font-family: 'DM Sans', sans-serif; font-weight: 600; color: #f9fafb; }
+  .td-mono { font-family: 'DM Mono', monospace; }
+  .empty-msg { color: #6b7280; padding: 24px 0; text-align: center; }
+
+  /* Fast start */
+  .fast-section { background: linear-gradient(135deg, #1a1000 0%, #1a1200 100%); border: 1px solid #854d0e; border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; }
+  .fast-title { font-size: 12px; font-weight: 800; color: #fbbf24; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+
+  /* Mantra */
+  #mantra { background: #0d1321; border-radius: 12px; padding: 14px 20px; border: 1px solid #1f2937; font-size: 12px; color: #6b7280; }
+  #mantra strong { color: #10b981; font-weight: 800; }
+
+  /* Empty UP state */
+  .empty-ups { text-align: center; color: #4b5563; padding: 32px 0; }
+  .empty-ups .big { font-size: 40px; }
+  .empty-ups p { margin-top: 8px; font-size: 14px; }
+
+  /* Summary section */
+  #summary-section { background: linear-gradient(135deg, #0a1628 0%, #111827 100%); border: 1px solid #1f2937; border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div>
+    <div id="logo">🏁 GREEN FORD KPI</div>
+    <div id="sub">Daily Sales Performance Tracker</div>
+  </div>
+  <div id="header-right">
+    <input type="date" id="date-picker" />
+    <div style="display:flex;gap:6px;">
+      <button class="nav-btn active" data-view="day">Day</button>
+      <button class="nav-btn" data-view="week">Week</button>
+      <button class="nav-btn" data-view="month">Month</button>
+      <button class="nav-btn" data-view="year">Year</button>
+    </div>
+    <button class="btn btn-blue" id="export-btn">⬇ Export Excel</button>
+  </div>
+</div>
+
+<div id="main"></div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'gf_kpi_v2';
+const STEPS = [
+  { key:'met',        label:'Met / Greeted',      icon:'🤝' },
+  { key:'form',       label:'FORM / Rapport',      icon:'💬' },
+  { key:'qualified',  label:'Needs Qualified',     icon:'🎯' },
+  { key:'picked',     label:'Vehicle Picked',      icon:'🚗' },
+  { key:'testDrive',  label:'Test Drive',           icon:'🛞' },
+  { key:'trade',      label:'KBB / Trade',          icon:'🔑' },
+  { key:'trialClose', label:'Trial Close',          icon:'📋' },
+  { key:'negotiated', label:'Negotiated',           icon:'🤜' },
+  { key:'closed',     label:"Closed / TO'd F&I",   icon:'✅' },
+  { key:'delivered',  label:'Delivered',            icon:'🎉' },
+];
+const FUNNEL_COLORS = ['#3b82f6','#6366f1','#8b5cf6','#a855f7','#ec4899','#f43f5e','#f59e0b','#f97316','#10b981','#06b6d4'];
+const SOURCES = ['Walk-in','Phone','Internet','Referral','Repeat','BDC','Facebook','Instagram','TikTok','Google','Reddit','YouTube'];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let appData = {};
+let activeDate = todayStr();
+let activeView = 'day';
+let activeTab  = 'phone';
+let openUpId   = null;
+
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function monthKey(d) { return d.slice(0,7); }
+function fmtDate(d) { return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtMonth(m) { return new Date(m+'-01T12:00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'}); }
+function pct(a,b) { return b>0 ? Math.round(a/b*100) : 0; }
+
+// ─── Storage ──────────────────────────────────────────────────────────────────
+function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+
+function getDay(date) {
+  if (!appData[date]) appData[date] = { date, callsMade:0, callsAnswered:0, apptSet:0, apptShowed:0, ups:[] };
+  return appData[date];
+}
+
+function emptyUp() {
+  const u = { id: Date.now(), name:'', source:'Walk-in', notes:'' };
+  STEPS.forEach(s => u[s.key] = false);
+  return u;
+}
+
+// ─── Aggregation ──────────────────────────────────────────────────────────────
+function aggregate(days) {
+  const r = { callsMade:0, callsAnswered:0, apptSet:0, apptShowed:0, ups:0 };
+  const steps = {};
+  STEPS.forEach(s => steps[s.key] = 0);
+  days.forEach(d => {
+    r.callsMade    += d.callsMade    || 0;
+    r.callsAnswered += d.callsAnswered || 0;
+    r.apptSet      += d.apptSet      || 0;
+    r.apptShowed   += d.apptShowed   || 0;
+    r.ups          += (d.ups||[]).length;
+    (d.ups||[]).forEach(u => STEPS.forEach(s => { if(u[s.key]) steps[s.key]++; }));
+  });
+  r.steps = steps;
+  return r;
+}
+
+function getViewDays() {
+  const all = Object.values(appData);
+  if (activeView === 'day')   return [getDay(activeDate)];
+  if (activeView === 'week') {
+    const d = new Date(activeDate+'T12:00:00');
+    const dow = d.getDay();
+    const start = new Date(d); start.setDate(d.getDate() - dow);
+    return Array.from({length:7}, (_,i) => {
+      const dd = new Date(start); dd.setDate(start.getDate()+i);
+      const k = dd.toISOString().slice(0,10);
+      return appData[k] || { date:k, callsMade:0, callsAnswered:0, apptSet:0, apptShowed:0, ups:[] };
+    });
+  }
+  if (activeView === 'month') return all.filter(d => d.date.startsWith(monthKey(activeDate)));
+  return all.filter(d => d.date.startsWith(activeDate.slice(0,4)));
+}
+
+function monthSummary() {
+  const months = {};
+  Object.values(appData).forEach(d => {
+    const m = monthKey(d.date);
+    if (!months[m]) months[m] = [];
+    months[m].push(d);
+  });
+  return Object.entries(months).sort((a,b) => a[0]>b[0]?1:-1).map(([m,days]) => ({month:m, ...aggregate(days)}));
+}
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const rows = [['Date','Calls Made','Calls Answered','Answer Rate %','Appts Set','Set Rate %','Appts Showed','Show Rate %','UPs','Test Drives','TD Rate %','Trial Closes','Closes','Close Rate %',...STEPS.map(s=>s.label)]];
+  Object.values(appData).sort((a,b)=>a.date>b.date?1:-1).forEach(day => {
+    const ups = day.ups||[];
+    const counts = {};
+    STEPS.forEach(s => counts[s.key] = ups.filter(u=>u[s.key]).length);
+    rows.push([
+      fmtDate(day.date), day.callsMade, day.callsAnswered, pct(day.callsAnswered,day.callsMade),
+      day.apptSet, pct(day.apptSet,day.callsAnswered),
+      day.apptShowed, pct(day.apptShowed,day.apptSet),
+      ups.length, counts.testDrive, pct(counts.testDrive,ups.length),
+      counts.trialClose, counts.closed, pct(counts.closed,ups.length),
+      ...STEPS.map(s=>counts[s.key])
+    ]);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`GreenFord_KPI_${todayStr()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── HTML Builders ────────────────────────────────────────────────────────────
+function statCard(label, value, sub, accent) {
+  return `<div class="stat-card" style="border:1px solid ${accent||'#1f2937'}">
+    <div class="stat-val" style="color:${accent||'#f9fafb'}">${value}</div>
+    <div class="stat-label">${label}</div>
+    ${sub ? `<div class="stat-sub">${sub}</div>` : ''}
+  </div>`;
+}
+
+function progBar(value, max, color) {
+  const w = max>0 ? Math.round(value/max*100) : 0;
+  return `<div class="prog-wrap"><div class="prog-fill" style="width:${w}%;background:${color||'#10b981'}"></div></div>`;
+}
+
+function rateColor(p, target) {
+  if (p >= target) return '#10b981';
+  if (p >= target*0.7) return '#f59e0b';
+  return '#ef4444';
+}
+
+function buildSummary(agg, label) {
+  return `<div id="summary-section">
+    <div class="section-title">${label} — Summary</div>
+    <div class="stat-row">
+      ${statCard('Calls Made', agg.callsMade, '', '#3b82f6')}
+      ${statCard('Answered', agg.callsAnswered, pct(agg.callsAnswered,agg.callsMade)+'% rate', '#6366f1')}
+      ${statCard('Appts Set', agg.apptSet, pct(agg.apptSet,agg.callsAnswered)+'% set rate', '#f59e0b')}
+      ${statCard('Appts Showed', agg.apptShowed, pct(agg.apptShowed,agg.apptSet)+'% show rate', '#10b981')}
+      ${statCard('Total UPs', agg.ups, '', '#ec4899')}
+      ${statCard('Test Drives', agg.steps.testDrive, pct(agg.steps.testDrive,agg.ups)+'% of UPs', '#8b5cf6')}
+      ${statCard('Closed', agg.steps.closed, pct(agg.steps.closed,agg.ups)+'% close rate', '#10b981')}
+    </div>
+  </div>`;
+}
+
+function buildPhoneTab(day) {
+  const fields = [
+    { key:'callsMade',     label:'Calls Made',           target:100, color:'#3b82f6' },
+    { key:'callsAnswered', label:'Calls Answered',        target:30,  color:'#6366f1' },
+    { key:'apptSet',       label:'Appointments Set',      target:3,   color:'#f59e0b' },
+    { key:'apptShowed',    label:'Appointments Showed',   target:2,   color:'#10b981' },
+  ];
+  const rates = [
+    { label:'Answer Rate', a:day.callsAnswered, b:day.callsMade, target:30 },
+    { label:'Set Rate',    a:day.apptSet,       b:day.callsAnswered, target:10 },
+    { label:'Show Rate',   a:day.apptShowed,    b:day.apptSet,   target:70 },
+  ];
+  return `<div class="section">
+    <div class="section-title">📞 Phone Activity — ${fmtDate(day.date)}</div>
+    <div class="phone-grid">
+      ${fields.map(f => `
+        <div class="phone-item">
+          <input class="num-input" type="number" min="0" value="${day[f.key]||0}" data-phone="${f.key}" />
+          <div class="field-label">${f.label}</div>
+          ${progBar(day[f.key]||0, f.target, f.color)}
+          <div class="prog-target">Target: ${f.target}/day</div>
+        </div>`).join('')}
+    </div>
+    <div class="rate-grid">
+      ${rates.map(r => {
+        const p = pct(r.a,r.b);
+        return `<div class="rate-box">
+          <div class="rate-val" style="color:${rateColor(p,r.target)}">${p}%</div>
+          <div class="field-label">${r.label}</div>
+          <div class="prog-target">Target ≥ ${r.target}%</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function buildFunnelTab(ups) {
+  const max = ups.length || 1;
+  return `<div class="section">
+    <div class="section-title">📊 Sales Funnel</div>
+    ${STEPS.map((step,i) => {
+      const count = ups.filter(u=>u[step.key]).length;
+      const w = Math.round(count/max*100);
+      return `<div class="funnel-row">
+        <div class="funnel-icon">${step.icon}</div>
+        <div class="funnel-name">${step.label}</div>
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar" style="width:${w}%;background:${FUNNEL_COLORS[i]}">
+            ${count>0?`<span>${count}</span>`:''}
+          </div>
+        </div>
+        <div class="funnel-pct" style="color:${FUNNEL_COLORS[i]}">${pct(count,ups.length)}%</div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:16px;font-size:12px;color:#6b7280">Based on ${ups.length} UP${ups.length!==1?'s':''} today.</div>
+  </div>`;
+}
+
+function buildUpsTab(day) {
+  const ups = day.ups || [];
+  return `<div class="section">
+    <div class="btn-row">
+      <div class="section-title" style="margin-bottom:0">🚗 Floor UPs — ${fmtDate(day.date)}</div>
+      <button class="btn btn-green" id="add-up-btn">+ Add UP</button>
+    </div>
+    ${ups.length===0 ? `<div class="empty-ups"><div class="big">🚗</div><p>No UPs logged yet. Hit "Add UP" when someone hits the lot.</p></div>` : ''}
+    <div id="ups-list">
+      ${ups.map(up => buildUpRow(up, up.id===openUpId)).join('')}
+    </div>
+  </div>`;
+}
+
+function buildUpRow(up, isOpen) {
+  const activeSteps = STEPS.filter(s=>up[s.key]).slice(0,5).map(s=>s.icon).join('');
+  const dotColor = up.closed ? '#10b981' : up.testDrive ? '#f59e0b' : '#6b7280';
+  return `<div class="up-row ${isOpen?'open':''}" data-up-id="${up.id}">
+    <div class="up-header" data-toggle="${up.id}">
+      <div class="up-dot" style="background:${dotColor}"></div>
+      <div class="up-name">${up.name||'Unnamed UP'}</div>
+      <div class="up-source">${up.source}</div>
+      <div class="up-icons">${activeSteps}</div>
+      <div class="up-chevron">${isOpen?'▲':'▼'}</div>
+    </div>
+    ${isOpen ? `<div class="up-body">
+      <div class="up-grid">
+        <div>
+          <div class="field-label">Customer Name</div>
+          <input class="text-input up-name-input" data-up="${up.id}" data-field="name" value="${up.name||''}" placeholder="First Last" />
+        </div>
+        <div>
+          <div class="field-label">Source</div>
+          <select class="text-input" data-up="${up.id}" data-field="source">
+            ${SOURCES.map(s=>`<option${s===up.source?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field-label">Sales Process Steps — tap to check off each step</div>
+      <div class="steps-wrap">
+        ${STEPS.map(step=>`<button class="step-btn ${up[step.key]?'on':'off'}" data-up="${up.id}" data-step="${step.key}">${step.icon} ${step.label}</button>`).join('')}
+      </div>
+      <div style="margin-top:12px">
+        <div class="field-label">Notes</div>
+        <textarea class="text-input" rows="2" data-up="${up.id}" data-field="notes" placeholder="Objections, follow-up items, etc...">${up.notes||''}</textarea>
+      </div>
+      <div class="btn-end">
+        <button class="btn btn-red" data-remove-up="${up.id}">Remove UP</button>
+      </div>
+    </div>` : ''}
+  </div>`;
+}
+
+function buildMonthTable(monthDays) {
+  const sorted = [...monthDays].sort((a,b)=>a.date>b.date?1:-1);
+  return `<div class="section">
+    <div class="section-title">Daily Breakdown — ${fmtMonth(monthKey(activeDate))}</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>${['Date','Calls','Ans%','Set%','Show%','UPs','TD%','Closed','Close%'].map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${sorted.map(d => {
+            const u = d.ups||[];
+            const td = u.filter(x=>x.testDrive).length;
+            const cl = u.filter(x=>x.closed).length;
+            const isActive = d.date===activeDate;
+            return `<tr class="clickable ${isActive?'active-row':''}" data-goto="${d.date}">
+              <td class="td-name">${fmtDate(d.date)}</td>
+              <td>${d.callsMade}</td>
+              <td style="color:${pct(d.callsAnswered,d.callsMade)>=30?'#10b981':'#ef4444'}">${pct(d.callsAnswered,d.callsMade)}%</td>
+              <td>${pct(d.apptSet,d.callsAnswered)}%</td>
+              <td>${pct(d.apptShowed,d.apptSet)}%</td>
+              <td>${u.length}</td>
+              <td style="color:${pct(td,u.length)>=80?'#10b981':'#f59e0b'}">${pct(td,u.length)}%</td>
+              <td style="color:#10b981;font-weight:800">${cl}</td>
+              <td>${pct(cl,u.length)}%</td>
+            </tr>`;
+          }).join('')}
+          ${sorted.length===0?`<tr><td colspan="9" class="empty-msg">No data for this month yet.</td></tr>`:''}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function buildYearTable() {
+  const ms = monthSummary().filter(r=>r.month.startsWith(activeDate.slice(0,4)));
+  return `<div class="section">
+    <div class="section-title">Monthly Rollup — ${activeDate.slice(0,4)}</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>${['Month','Calls','Ans%','Appts Set','Show%','Total UPs','Test Drives','TD%','Closed','Close%','Est. Income'].map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${ms.map(r => {
+            const td = r.steps.testDrive, cl = r.steps.closed;
+            const income = cl*830;
+            const isActive = monthKey(activeDate)===r.month;
+            return `<tr class="clickable ${isActive?'active-row':''}" data-goto-month="${r.month}">
+              <td class="td-name" style="font-family:'DM Sans',sans-serif;font-weight:700">${fmtMonth(r.month)}</td>
+              <td>${r.callsMade}</td>
+              <td style="color:${pct(r.callsAnswered,r.callsMade)>=30?'#10b981':'#ef4444'}">${pct(r.callsAnswered,r.callsMade)}%</td>
+              <td>${r.apptSet}</td>
+              <td>${pct(r.apptShowed,r.apptSet)}%</td>
+              <td>${r.ups}</td>
+              <td>${td}</td>
+              <td style="color:${pct(td,r.ups)>=80?'#10b981':'#f59e0b'}">${pct(td,r.ups)}%</td>
+              <td style="color:#10b981;font-weight:800">${cl}</td>
+              <td>${pct(cl,r.ups)}%</td>
+              <td style="color:#10b981;font-weight:700">$${income.toLocaleString()}</td>
+            </tr>`;
+          }).join('')}
+          ${ms.length===0?`<tr><td colspan="11" class="empty-msg">No data for ${activeDate.slice(0,4)} yet.</td></tr>`:''}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function buildFastStart() {
+  const m = monthKey(activeDate);
+  const mDays = Object.values(appData).filter(d=>d.date.startsWith(m));
+  const allUps = mDays.flatMap(d=>d.ups||[]);
+  const totalClosed = allUps.filter(u=>u.closed).length;
+  const day10Days = mDays.filter(d=>parseInt(d.date.slice(8,10))<=10);
+  const day10UPs  = day10Days.flatMap(d=>d.ups||[]);
+  const closedBy10   = day10UPs.filter(u=>u.closed).length;
+  const closedAfter10 = totalClosed - closedBy10;
+  const fsHit = closedBy10   >= 6;
+  const ffHit = closedAfter10 >= 8;
+  const bonus = (fsHit?1000:0) + (ffHit?(fsHit?1000:500):0);
+  return `<div class="fast-section">
+    <div class="fast-title">🏆 Fast Start / Fast Finish Tracker</div>
+    <div class="stat-row">
+      ${statCard('Closed by 10th',    closedBy10,    'Need 6 for Fast Start',   fsHit?'#10b981':'#fbbf24')}
+      ${statCard('Fast Start',         fsHit?'✅ HIT':`${6-closedBy10} to go`, '', fsHit?'#10b981':'#fbbf24')}
+      ${statCard('Closed After 10th',  closedAfter10, 'Need 8 for Fast Finish',  ffHit?'#10b981':'#f97316')}
+      ${statCard('Fast Finish',         ffHit?'✅ HIT':`${8-closedAfter10} to go`, '', ffHit?'#10b981':'#f97316')}
+      ${statCard('Bonus Earned',        '$'+bonus.toLocaleString(), 'on top of commission', bonus>0?'#10b981':'#6b7280')}
+    </div>
+  </div>`;
+}
+
+function buildMantra() {
+  return `<div id="mantra"><strong>DAN'S DAILY MANTRA: </strong>Cars are priced by the condition they're in · Get a firm number on what they can pay · Fear of loss &gt; Hope for gain · Ask for the business 5 times</div>`;
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const main = document.getElementById('main');
+  const day  = getDay(activeDate);
+  const agg  = aggregate(getViewDays());
+  const ups  = day.ups || [];
+
+  let summaryLabel;
+  if (activeView==='day')   summaryLabel = fmtDate(activeDate);
+  else if (activeView==='week') {
+    const d = new Date(activeDate+'T12:00:00');
+    const start = new Date(d); start.setDate(d.getDate()-d.getDay());
+    summaryLabel = `Week of ${fmtDate(start.toISOString().slice(0,10))}`;
+  }
+  else if (activeView==='month') summaryLabel = fmtMonth(monthKey(activeDate));
+  else summaryLabel = activeDate.slice(0,4);
+
+  let html = buildSummary(agg, summaryLabel);
+
+  if (activeView==='day') {
+    html += `<div class="tab-bar">
+      <button class="tab-btn ${activeTab==='phone'?'active':''}" data-tab="phone">📞 Phone KPIs</button>
+      <button class="tab-btn ${activeTab==='floor'?'active':''}" data-tab="floor">📊 Funnel</button>
+      <button class="tab-btn ${activeTab==='ups'?'active':''}" data-tab="ups">🚗 UPs (${ups.length})</button>
+    </div>`;
+    if (activeTab==='phone') html += buildPhoneTab(day);
+    if (activeTab==='floor') html += buildFunnelTab(ups);
+    if (activeTab==='ups')   html += buildUpsTab(day);
+  }
+
+  if (activeView==='month') html += buildMonthTable(Object.values(appData).filter(d=>d.date.startsWith(monthKey(activeDate))));
+  if (activeView==='year')  html += buildYearTable();
+  if (activeView==='day' || activeView==='month') html += buildFastStart();
+
+  html += buildMantra();
+  main.innerHTML = html;
+  bindEvents();
+}
+
+// ─── Event Binding ────────────────────────────────────────────────────────────
+function bindEvents() {
+  // Phone inputs
+  document.querySelectorAll('[data-phone]').forEach(el => {
+    el.addEventListener('change', e => {
+      const day = getDay(activeDate);
+      day[e.target.dataset.phone] = Math.max(0, parseInt(e.target.value)||0);
+      saveData();
+      render();
+    });
+    el.addEventListener('input', e => {
+      const day = getDay(activeDate);
+      day[e.target.dataset.phone] = Math.max(0, parseInt(e.target.value)||0);
+      saveData();
+      // Just update progress bars without full re-render
+      const val = day[e.target.dataset.phone];
+      const targets = {callsMade:100,callsAnswered:30,apptSet:3,apptShowed:2};
+      const colors  = {callsMade:'#3b82f6',callsAnswered:'#6366f1',apptSet:'#f59e0b',apptShowed:'#10b981'};
+      const key = e.target.dataset.phone;
+      const wrap = e.target.closest('.phone-item');
+      if (wrap) {
+        const fill = wrap.querySelector('.prog-fill');
+        if (fill) { const t=targets[key]; fill.style.width = (t>0?Math.round(val/t*100):0)+'%'; }
+      }
+    });
+  });
+
+  // Tabs
+  document.querySelectorAll('[data-tab]').forEach(el => {
+    el.addEventListener('click', e => { activeTab=e.currentTarget.dataset.tab; render(); });
+  });
+
+  // Add UP
+  const addBtn = document.getElementById('add-up-btn');
+  if (addBtn) addBtn.addEventListener('click', () => {
+    const day = getDay(activeDate);
+    const u = emptyUp();
+    day.ups.push(u);
+    openUpId = u.id;
+    saveData();
+    render();
+  });
+
+  // UP toggle
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', e => {
+      const id = parseInt(el.dataset.toggle);
+      openUpId = openUpId===id ? null : id;
+      render();
+    });
+  });
+
+  // UP field changes
+  document.querySelectorAll('[data-up][data-field]').forEach(el => {
+    el.addEventListener('input', e => {
+      const id = parseInt(el.dataset.up);
+      const field = el.dataset.field;
+      const day = getDay(activeDate);
+      const up = day.ups.find(u=>u.id===id);
+      if (up) { up[field]=el.value; saveData(); }
+    });
+    el.addEventListener('change', e => {
+      const id = parseInt(el.dataset.up);
+      const field = el.dataset.field;
+      const day = getDay(activeDate);
+      const up = day.ups.find(u=>u.id===id);
+      if (up) { up[field]=el.value; saveData(); render(); }
+    });
+  });
+
+  // Step buttons
+  document.querySelectorAll('[data-step]').forEach(el => {
+    el.addEventListener('click', e => {
+      const id   = parseInt(el.dataset.up);
+      const step = el.dataset.step;
+      const day  = getDay(activeDate);
+      const up   = day.ups.find(u=>u.id===id);
+      if (up) { up[step]=!up[step]; saveData(); render(); }
+    });
+  });
+
+  // Remove UP
+  document.querySelectorAll('[data-remove-up]').forEach(el => {
+    el.addEventListener('click', e => {
+      const id = parseInt(el.dataset.removeUp);
+      const day = getDay(activeDate);
+      day.ups = day.ups.filter(u=>u.id!==id);
+      openUpId = null;
+      saveData(); render();
+    });
+  });
+
+  // Month table drill-down
+  document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => { activeDate=el.dataset.goto; activeView='day'; activeTab='phone'; setViewBtns(); render(); });
+  });
+
+  // Year table drill-down
+  document.querySelectorAll('[data-goto-month]').forEach(el => {
+    el.addEventListener('click', () => {
+      activeDate=el.dataset.gotoMonth+'-01'; activeView='month'; setViewBtns(); render();
+    });
+  });
+}
+
+function setViewBtns() {
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view===activeView);
+  });
+  document.getElementById('date-picker').value = activeDate;
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+appData = loadData();
+
+const picker = document.getElementById('date-picker');
+picker.value = activeDate;
+picker.addEventListener('change', e => { activeDate=e.target.value; render(); });
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    activeView = e.currentTarget.dataset.view;
+    setViewBtns();
+    render();
+  });
+});
+
+document.getElementById('export-btn').addEventListener('click', exportCSV);
+
+render();
+</script>
+</body>
+</html>
